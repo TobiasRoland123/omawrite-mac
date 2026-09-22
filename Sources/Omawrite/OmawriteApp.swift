@@ -26,10 +26,10 @@ struct OmawriteApp: App {
                 .preferredColorScheme(AppearanceChoice(rawValue: appearance)?.colorScheme)
         }
 
-        Window("Keyboard Shortcuts", id: "shortcuts") {
+        Window("Keyboard Shortcuts", id: KeyboardShortcutConfig.windowID) {
             ShortcutsView()
         }
-        .windowResizability(.contentSize)
+        .defaultSize(width: 520, height: 620)
         .defaultPosition(.center)
     }
 }

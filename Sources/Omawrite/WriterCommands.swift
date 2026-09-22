@@ -15,17 +15,17 @@ struct WriterCommands: Commands {
             Button("New Document") {
                 newDocument(MarkdownDocument())
             }
-            .keyboardShortcut("n")
+            .appShortcut(KeyboardShortcutConfig.newDocument)
 
             Button("Quick Open…") {
                 QuickOpenManager.shared.show()
             }
-            .keyboardShortcut("o")
+            .appShortcut(KeyboardShortcutConfig.quickOpen)
 
             Button("Open with System Picker…") {
                 NSDocumentController.shared.openDocument(nil)
             }
-            .keyboardShortcut("o", modifiers: [.command, .shift])
+            .appShortcut(KeyboardShortcutConfig.systemOpen)
 
             Button("Link Folder…") {
                 let panel = NSOpenPanel()
@@ -42,7 +42,7 @@ struct WriterCommands: Commands {
                     }
                 }
             }
-            .keyboardShortcut("d", modifiers: [.command])
+            .appShortcut(KeyboardShortcutConfig.linkFolder)
         }
 
         CommandGroup(after: .newItem) {
@@ -55,59 +55,66 @@ struct WriterCommands: Commands {
                 Button("Clear Menu") { recent.clear() }.disabled(recent.urls.isEmpty)
             }
             Divider()
-            Button("Close") { NSApp.keyWindow?.performClose(nil) }.keyboardShortcut("w")
+            Button("Close") { NSApp.keyWindow?.performClose(nil) }
+                .appShortcut(KeyboardShortcutConfig.close)
         }
 
         CommandGroup(replacing: .saveItem) {
             Button("Save") { editor?.save() }
-                .keyboardShortcut("s").disabled(editor == nil)
+                .appShortcut(KeyboardShortcutConfig.save).disabled(editor == nil)
             Button("Save As…") {
                 NSApp.sendAction(#selector(NSDocument.saveAs(_:)), to: nil, from: nil)
             }
-            .keyboardShortcut("s", modifiers: [.command, .shift])
+            .appShortcut(KeyboardShortcutConfig.saveAs)
             .disabled(editor == nil)
         }
 
         CommandGroup(replacing: .printItem) {
             Button("Print…") { editor?.printDocument() }
-                .keyboardShortcut("p").disabled(editor == nil)
+                .appShortcut(KeyboardShortcutConfig.printDocument).disabled(editor == nil)
         }
 
         CommandGroup(after: .textEditing) {
             Menu("Find") {
-                Button("Find…") { editor?.find(.showFindInterface) }.keyboardShortcut("f")
+                Button("Find…") { editor?.find(.showFindInterface) }
+                    .appShortcut(KeyboardShortcutConfig.find)
                 Button("Find and Replace…") { editor?.find(.showReplaceInterface) }
-                    .keyboardShortcut("f", modifiers: [.command, .option])
-                Button("Find Next") { editor?.find(.nextMatch) }.keyboardShortcut("g")
+                    .appShortcut(KeyboardShortcutConfig.findAndReplace)
+                Button("Find Next") { editor?.find(.nextMatch) }
+                    .appShortcut(KeyboardShortcutConfig.findNext)
                 Button("Find Previous") { editor?.find(.previousMatch) }
-                    .keyboardShortcut("g", modifiers: [.command, .shift])
-                Button("Use Selection for Find") { editor?.find(.setSearchString) }.keyboardShortcut("e")
+                    .appShortcut(KeyboardShortcutConfig.findPrevious)
+                Button("Use Selection for Find") { editor?.find(.setSearchString) }
+                    .appShortcut(KeyboardShortcutConfig.useSelectionForFind)
             }
             .disabled(editor == nil)
         }
 
         CommandMenu("Format") {
             Group {
-                Button("Bold") { editor?.format("**") }.keyboardShortcut("b")
-                Button("Italic") { editor?.format("*") }.keyboardShortcut("i")
-                Button("Insert Link") { editor?.insertLink() }.keyboardShortcut("k")
+                Button("Bold") { editor?.format("**") }.appShortcut(KeyboardShortcutConfig.bold)
+                Button("Italic") { editor?.format("*") }.appShortcut(KeyboardShortcutConfig.italic)
+                Button("Insert Link") { editor?.insertLink() }.appShortcut(KeyboardShortcutConfig.insertLink)
                 Button("Inline Code") { editor?.format("`") }
-                    .keyboardShortcut("k", modifiers: [.command, .shift])
+                    .appShortcut(KeyboardShortcutConfig.inlineCode)
             }
             .disabled(editor == nil)
         }
 
         CommandGroup(after: .toolbar) {
             Divider()
-            Toggle("Focus Mode", isOn: $focusMode).keyboardShortcut("d", modifiers: [.command, .shift])
-            Toggle("Show Markdown Syntax", isOn: $showSyntax).keyboardShortcut("m", modifiers: [.command, .shift])
+            Toggle("Focus Mode", isOn: $focusMode).appShortcut(KeyboardShortcutConfig.focusMode)
+            Toggle("Show Markdown Syntax", isOn: $showSyntax).appShortcut(KeyboardShortcutConfig.showSyntax)
             Divider()
-            Button("Larger Text") { fontSize = min(32, fontSize + 1) }.keyboardShortcut("+")
-            Button("Smaller Text") { fontSize = max(14, fontSize - 1) }.keyboardShortcut("-")
-            Button("Actual Size") { fontSize = 20 }.keyboardShortcut("0")
+            Button("Larger Text") { fontSize = min(32, fontSize + 1) }
+                .appShortcut(KeyboardShortcutConfig.largerText)
+            Button("Smaller Text") { fontSize = max(14, fontSize - 1) }
+                .appShortcut(KeyboardShortcutConfig.smallerText)
+            Button("Actual Size") { fontSize = 20 }
+                .appShortcut(KeyboardShortcutConfig.actualSize)
             Divider()
             Button("Toggle Full Screen") { NSApp.keyWindow?.toggleFullScreen(nil) }
-                .keyboardShortcut("f", modifiers: [.command, .control])
+                .appShortcut(KeyboardShortcutConfig.fullScreen)
         }
 
         CommandGroup(replacing: .help) {
@@ -118,8 +125,28 @@ struct WriterCommands: Commands {
                     newDocument(MarkdownDocument(text: text))
                 } catch { NSApp.presentError(error) }
             }
-            Button("Keyboard Shortcuts") { openWindow(id: "shortcuts") }
-                .keyboardShortcut("/", modifiers: [.command, .shift])
+            Button("Keyboard Shortcuts") { toggleShortcutOverview() }
+                .appShortcut(KeyboardShortcutConfig.shortcutOverview)
+        }
+    }
+
+    private func toggleShortcutOverview() {
+        let shortcutWindow = NSApp.windows.first {
+            $0.identifier?.rawValue == KeyboardShortcutConfig.windowID
+        }
+
+        guard let shortcutWindow else {
+            openWindow(id: KeyboardShortcutConfig.windowID)
+            return
+        }
+
+        if shortcutWindow.isVisible && !shortcutWindow.isMiniaturized {
+            shortcutWindow.performClose(nil)
+        } else {
+            if shortcutWindow.isMiniaturized {
+                shortcutWindow.deminiaturize(nil)
+            }
+            shortcutWindow.makeKeyAndOrderFront(nil)
         }
     }
 }

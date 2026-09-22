@@ -2,6 +2,19 @@ import SwiftUI
 import AppKit
 
 struct SettingsView: View {
+    var body: some View {
+        TabView {
+            GeneralSettingsView()
+                .tabItem { Label("General", systemImage: "gearshape") }
+
+            ShortcutsView()
+                .tabItem { Label("Shortcuts", systemImage: "keyboard") }
+        }
+        .frame(width: 520, height: 620)
+    }
+}
+
+private struct GeneralSettingsView: View {
     @AppStorage("appearance") private var appearance = AppearanceChoice.system.rawValue
     @AppStorage("fontSize") private var fontSize = 20.0
     @AppStorage("showSyntax") private var showSyntax = false
@@ -135,42 +148,5 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 480, height: 620)
-    }
-}
-
-struct ShortcutsView: View {
-    private let shortcuts: [(String, String)] = [
-        ("New document", "⌘ N"), ("Quick open", "⌘ O"),
-        ("Open with system picker", "⇧ ⌘ O"), ("Link folder", "⌘ D"),
-        ("Save", "⌘ S"), ("Save as", "⇧ ⌘ S"),
-        ("Undo / redo", "⌘ Z / ⇧ ⌘ Z"),
-        ("Find", "⌘ F"), ("Find and replace", "⌥ ⌘ F"),
-        ("Next / previous match", "⌘ G / ⇧ ⌘ G"),
-        ("Bold", "⌘ B"), ("Italic", "⌘ I"),
-        ("Insert link", "⌘ K"), ("Inline code", "⇧ ⌘ K"),
-        ("Focus mode", "⇧ ⌘ D"), ("Show Markdown syntax", "⇧ ⌘ M"),
-        ("Larger / smaller text", "⌘ + / ⌘ −"), ("Actual text size", "⌘ 0"),
-        ("Full screen", "⌃ ⌘ F"), ("Print", "⌘ P"), ("Settings", "⌘ ,")
-    ]
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 22) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("At your fingertips.").font(.system(size: 24, weight: .medium, design: .serif))
-                Text("Keep your hands on the words.").font(.system(size: 13)).foregroundStyle(.secondary)
-            }
-            Grid(alignment: .leading, horizontalSpacing: 64, verticalSpacing: 11) {
-                ForEach(shortcuts, id: \.0) { title, keys in
-                    GridRow {
-                        Text(title).foregroundStyle(.secondary)
-                        Text(keys).font(.system(size: 12, design: .monospaced)).frame(maxWidth: .infinity, alignment: .trailing)
-                    }
-                    .font(.system(size: 13))
-                }
-            }
-        }
-        .padding(32)
-        .frame(width: 460)
     }
 }

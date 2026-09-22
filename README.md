@@ -39,7 +39,9 @@ For a faster development build, use `./scripts/build.sh debug`. Open `Package.sw
 - Formatted printing and Save as PDF through the macOS print dialog.
 - UTF-8 and UTF-16 with a byte-order mark; the original encoding and line-ending convention are retained when saving. Unsupported/binary files are rejected instead of decoded with replacement characters.
 
-Use **Help → Welcome to Omawrite** for a sample document, or **Help → Keyboard Shortcuts** for the reference. A fresh document starts blank; placeholder text is never saved into it.
+Use **Help → Welcome to Omawrite** for a sample document, or toggle the shortcut reference with **⌥⌘K**. The same overview is available in **Settings → Shortcuts**. A fresh document starts blank; placeholder text is never saved into it.
+
+Shortcut definitions live in `Sources/Omawrite/KeyboardShortcuts.swift`. That registry supplies both the menu key equivalents and the in-app overview, so changing a configured shortcut updates both places.
 
 | Action | Shortcut |
 | --- | --- |
