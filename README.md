@@ -30,7 +30,8 @@ For a faster development build, use `./scripts/build.sh debug`. Open `Package.sw
 ## Writing
 
 - Plain Markdown files, with multiple document windows and native Open, Save, Save As, and recent-file menus.
-- Live styling for headings, emphasis, links, lists, quotes, and code. Inline markers stay visible in the current paragraph and recede elsewhere. “Show Markdown Syntax” makes all markers visible.
+- Live styling for headings, emphasis, links, lists, quotes, code, and horizontal dividers. Inline markers stay visible in the current paragraph and recede elsewhere. “Show Markdown Syntax” makes all markers visible.
+- Write `---` on its own line, with blank lines around it, for a horizontal divider. Standard `***` and `___` dividers also work. Move away from the line to see the divider; return to it to edit the original Markdown.
 - Native selection, undo/redo, spellchecking, find/replace, and international text input through an AppKit text view hosted in SwiftUI.
 - Bold, italic, link, and code shortcuts; list continuation; paste a URL over a selection to make a link.
 - Word count, character count, reading time, and paragraph focus mode.

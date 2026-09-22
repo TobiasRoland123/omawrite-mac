@@ -24,6 +24,8 @@ The word count is in the corner. Your documents use the Mac’s autosave and rec
 
 Save with Command S. Open your files in any editor, keep them in any folder, and make this little space your own.
 
+---
+
 Inspired by [the original Omawrite](https://github.com/omacom/omawrite).
 
 Happy writing.

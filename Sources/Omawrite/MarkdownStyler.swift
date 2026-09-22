@@ -10,6 +10,7 @@ enum MarkdownStyler {
     private static let inlineCode = expression("(`+)([^`\\n]+)\\1")
     private static let link = expression("(?<!!)\\[((?:\\\\.|[^\\]\\n])+)\\]\\(((?:\\\\.|[^)\\n])+)\\)")
     private static let fence = expression("(?m)^[ \\t]{0,3}(`{3,}|~{3,})[^\\n]*$")
+    private static let divider = expression("(?m)^ {0,3}(?:(?:-[ \\t]*){3,}|(?:\\*[ \\t]*){3,}|(?:_[ \\t]*){3,})$")
 
     private static func expression(_ pattern: String) -> NSRegularExpression {
         // These are static developer-authored expressions, checked at launch.
@@ -30,6 +31,8 @@ enum MarkdownStyler {
             .font: regular, .foregroundColor: theme.foreground, .paragraphStyle: paragraphStyle
         ]
         editor.typingAttributes = base
+        editor.visibleDividerRanges = []
+        defer { editor.needsDisplay = true }
         guard whole.length > 0 else { return }
 
         storage.beginEditing()
@@ -74,6 +77,25 @@ enum MarkdownStyler {
             }
         }
 
+        if editor.cachedDividers.source != text {
+            // Parse through each candidate to distinguish rules from Setext
+            // headings and literal text. A top-level rule closes the preceding
+            // blocks, so subsequent candidates can start from that boundary.
+            var blockStart = 0
+            var ranges = [NSRange]()
+            matches(divider) { match in
+                let end = NSMaxRange(match.range)
+                let block = (text as NSString).substring(with: NSRange(location: blockStart, length: end - blockStart))
+                guard let parsed = try? AttributedString(markdown: block),
+                      let components = parsed.runs.last?.presentationIntent?.components,
+                      components.count == 1, components.first?.kind == .thematicBreak
+                else { return }
+                ranges.append(match.range)
+                blockStart = end
+            }
+            editor.cachedDividers = (text, ranges)
+        }
+
         matches(inlineCode) { match in
             storage.addAttribute(.backgroundColor, value: theme.codeBackground, range: match.range)
             protectedRanges.append(match.range)
@@ -114,6 +136,17 @@ enum MarkdownStyler {
             let after = NSRange(location: afterStart, length: whole.length - afterStart)
             for range in [before, after] where range.length > 0 {
                 storage.addAttribute(.foregroundColor, value: dim, range: range)
+            }
+        }
+        for range in editor.cachedDividers.ranges {
+            storage.setAttributes(base, range: range)
+            if showSyntax || NSIntersectionRange(activeParagraph, range).length > 0 {
+                storage.addAttribute(.foregroundColor, value: theme.marker, range: range)
+            } else {
+                // Keep the original glyph advances and line height for caret
+                // navigation; the text view draws the rule over this line.
+                storage.addAttribute(.foregroundColor, value: NSColor.clear, range: range)
+                editor.visibleDividerRanges.append(range)
             }
         }
     }

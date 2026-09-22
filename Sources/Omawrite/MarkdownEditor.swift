@@ -188,6 +188,8 @@ final class WriterScrollView: NSScrollView {
 final class WriterTextView: NSTextView {
     var theme = PaperTheme(dark: false)
     var writerFontSize: CGFloat = 20
+    var cachedDividers: (source: String, ranges: [NSRange]) = ("", [])
+    var visibleDividerRanges: [NSRange] = []
 
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
@@ -197,6 +199,19 @@ final class WriterTextView: NSTextView {
 
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
+        if let layoutManager, let textContainer {
+            theme.marker.setFill()
+            for range in visibleDividerRanges where NSMaxRange(range) <= (string as NSString).length {
+                let glyphs = layoutManager.glyphRange(forCharacterRange: range, actualCharacterRange: nil)
+                guard glyphs.length > 0 else { continue }
+                let line = layoutManager.lineFragmentRect(forGlyphAt: glyphs.location, effectiveRange: nil)
+                let padding = textContainer.lineFragmentPadding
+                let rule = NSRect(x: textContainerOrigin.x + line.minX + padding,
+                                  y: textContainerOrigin.y + line.midY,
+                                  width: max(0, line.width - padding * 2), height: 1)
+                if rule.intersects(dirtyRect) { rule.fill() }
+            }
+        }
         if string.isEmpty {
             ("# Start writing" as NSString).draw(at: textContainerOrigin,
                 withAttributes: [.font: WriterFonts.font(size: writerFontSize),
@@ -216,7 +231,11 @@ final class WriterTextView: NSTextView {
     }
 
     override func insertNewline(_ sender: Any?) {
-        if !hasMarkedText(), let mutation = MarkdownEditing.continueList(string, selection: selectedRange()) {
+        let selection = selectedRange()
+        let isDivider = cachedDividers.source == string && cachedDividers.ranges.contains {
+            selection.location >= $0.location && selection.location <= NSMaxRange($0)
+        }
+        if !hasMarkedText(), !isDivider, let mutation = MarkdownEditing.continueList(string, selection: selection) {
             apply(mutation, actionName: "Continue List")
         } else {
             super.insertNewline(sender)

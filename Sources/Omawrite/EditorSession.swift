@@ -49,7 +49,8 @@ final class EditorSession: ObservableObject {
         info.isVerticallyCentered = false
         let width = info.paperSize.width - info.leftMargin - info.rightMargin
         let printView = NSTextView(frame: NSRect(x: 0, y: 0, width: width, height: 100))
-        printView.textStorage?.setAttributedString(MarkdownPrintRenderer.render(textView.string))
+        let contentWidth = width - 2 * (printView.textContainer?.lineFragmentPadding ?? 0)
+        printView.textStorage?.setAttributedString(MarkdownPrintRenderer.render(textView.string, contentWidth: contentWidth))
         printView.textContainerInset = NSSize(width: 0, height: 8)
         printView.textContainer?.containerSize = NSSize(width: width, height: CGFloat.greatestFiniteMagnitude)
         printView.layoutManager?.ensureLayout(for: printView.textContainer!)
