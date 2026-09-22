@@ -5,7 +5,7 @@ struct EditorView: View {
     @Binding var document: MarkdownDocument
     let fileURL: URL?
     let isEditable: Bool
-    @StateObject private var session = EditorSession()
+    @ObservedObject var session: EditorSession
     @Environment(\.colorScheme) private var colorScheme
     @AppStorage("fontSize") private var fontSize = 20.0
     @AppStorage("showSyntax") private var showSyntax = false

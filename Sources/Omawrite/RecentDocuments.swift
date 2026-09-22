@@ -4,7 +4,7 @@ import Combine
 @MainActor
 final class RecentDocuments: ObservableObject {
     static let shared = RecentDocuments()
-    // SwiftUI must install its document controller before shared is accessed.
+    // The app must install its document controller before shared is accessed.
     // Commands can be constructed earlier, so load recents when a menu opens.
     @Published private(set) var urls: [URL] = []
     private var menuObserver: NSObjectProtocol?

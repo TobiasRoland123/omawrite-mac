@@ -3,9 +3,8 @@ import AppKit
 
 struct WriterCommands: Commands {
     @StateObject private var recent = RecentDocuments.shared
-    @FocusedValue(\.editorSession) private var editor
-    @Environment(\.openWindow) private var openWindow
-    @Environment(\.newDocument) private var newDocument
+    @ObservedObject private var documents = WriterDocumentController.sharedWriter
+    private var editor: EditorSession? { documents.activeDocument?.session }
     @AppStorage("focusMode") private var focusMode = false
     @AppStorage("showSyntax") private var showSyntax = false
     @AppStorage("fontSize") private var fontSize = 20.0
@@ -13,7 +12,7 @@ struct WriterCommands: Commands {
     var body: some Commands {
         CommandGroup(replacing: .newItem) {
             Button("New Document") {
-                newDocument(MarkdownDocument())
+                documents.newDocument()
             }
             .keyboardShortcut("n")
 
@@ -115,11 +114,29 @@ struct WriterCommands: Commands {
                 do {
                     guard let url = Bundle.module.url(forResource: "Welcome", withExtension: "md") else { return }
                     let text = try String(contentsOf: url, encoding: .utf8)
-                    newDocument(MarkdownDocument(text: text))
+                    documents.newDocument(text: text)
                 } catch { NSApp.presentError(error) }
             }
-            Button("Keyboard Shortcuts") { openWindow(id: "shortcuts") }
+            Button("Keyboard Shortcuts") { ShortcutsWindow.show() }
                 .keyboardShortcut("/", modifiers: [.command, .shift])
         }
+    }
+}
+
+@MainActor
+private enum ShortcutsWindow {
+    static var controller: NSWindowController?
+
+    static func show() {
+        if controller == nil {
+            let window = NSWindow(contentRect: .zero, styleMask: [.titled, .closable], backing: .buffered, defer: false)
+            window.title = "Keyboard Shortcuts"
+            window.isReleasedWhenClosed = false
+            window.contentView = NSHostingView(rootView: ShortcutsView())
+            window.center()
+            controller = NSWindowController(window: window)
+        }
+        controller?.showWindow(nil)
+        controller?.window?.makeKeyAndOrderFront(nil)
     }
 }

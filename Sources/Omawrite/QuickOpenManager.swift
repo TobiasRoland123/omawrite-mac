@@ -70,18 +70,17 @@ final class QuickOpenManager: NSObject, NSWindowDelegate {
 
         let panel = QuickOpenPanel(
             contentRect: NSRect(x: 0, y: 0, width: 620, height: 420),
-            styleMask: [.titled, .fullSizeContentView],
+            styleMask: [.borderless],
             backing: .buffered,
             defer: false
         )
         panel.isFloatingPanel = true
         panel.level = .floating
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
-        panel.titleVisibility = .hidden
-        panel.titlebarAppearsTransparent = true
         panel.isMovableByWindowBackground = true
         panel.isReleasedWhenClosed = false
         panel.hasShadow = true
+        panel.isOpaque = false
         panel.backgroundColor = .clear
         panel.delegate = self
 

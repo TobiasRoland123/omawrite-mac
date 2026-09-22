@@ -8,29 +8,15 @@ struct OmawriteApp: App {
 
     init() {
         WriterFonts.register()
+        _ = WriterDocumentController.sharedWriter
     }
 
     var body: some Scene {
-        DocumentGroup(newDocument: MarkdownDocument()) { configuration in
-            EditorView(document: configuration.$document,
-                       fileURL: configuration.fileURL,
-                       isEditable: configuration.isEditable)
-                .preferredColorScheme(AppearanceChoice(rawValue: appearance)?.colorScheme)
-        }
-        .defaultSize(width: 1080, height: 780)
-        .windowToolbarStyle(.unifiedCompact)
-        .commands { WriterCommands() }
-
         Settings {
             SettingsView()
                 .preferredColorScheme(AppearanceChoice(rawValue: appearance)?.colorScheme)
         }
-
-        Window("Keyboard Shortcuts", id: "shortcuts") {
-            ShortcutsView()
-        }
-        .windowResizability(.contentSize)
-        .defaultPosition(.center)
+        .commands { WriterCommands() }
     }
 }
 
@@ -45,10 +31,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             let hasOpenedFile = NSDocumentController.shared.documents.contains { $0.fileURL != nil }
             if !hasOpenedFile {
+                if NSDocumentController.shared.documents.isEmpty {
+                    WriterDocumentController.sharedWriter.newDocument()
+                }
                 QuickOpenManager.shared.show()
             }
         }
     }
+
+    func applicationShouldOpenUntitledFile(_ sender: NSApplication) -> Bool { false }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         if !flag {

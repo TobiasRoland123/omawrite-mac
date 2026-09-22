@@ -29,7 +29,8 @@ For a faster development build, use `./scripts/build.sh debug`. Open `Package.sw
 
 ## Writing
 
-- Plain Markdown files, with multiple document windows and native Open, Save, Save As, and recent-file menus.
+- Plain Markdown files, with multiple document windows, Quick Open, and recent-file menus.
+- An in-app save sheet for Save, Save As, and closing drafts. Type a filename and folder path, or choose a linked folder. Return saves, Escape cancels, ⇧⌘G focuses the folder, and ⌘D discards a draft when closing. Existing files require confirmation before replacement; save errors keep the draft open.
 - Live styling for headings, emphasis, links, lists, quotes, code, and horizontal dividers. Inline markers stay visible in the current paragraph and recede elsewhere. “Show Markdown Syntax” makes all markers visible.
 - Write `---` on its own line, with blank lines around it, for a horizontal divider. Standard `***` and `___` dividers also work. Move away from the line to see the divider; return to it to edit the original Markdown.
 - Native selection, undo/redo, spellchecking, find/replace, and international text input through an AppKit text view hosted in SwiftUI.
