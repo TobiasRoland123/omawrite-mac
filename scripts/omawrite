@@ -1,0 +1,19 @@
+#!/bin/bash
+set -euo pipefail
+
+if [[ $# -eq 0 ]]; then
+    exec open -b dev.omawrite.mac
+fi
+
+# Make paths absolute before passing them to `open`. Besides preserving the
+# caller's working directory, this also lets filenames beginning with "-" work.
+documents=()
+for document in "$@"; do
+    if [[ "$document" == /* ]]; then
+        documents+=("$document")
+    else
+        documents+=("$PWD/$document")
+    fi
+done
+
+exec open -b dev.omawrite.mac "${documents[@]}"

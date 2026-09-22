@@ -15,6 +15,12 @@ open build/Omawrite.app
 ./scripts/install.sh
 ```
 
+The install script also adds an `omawrite` command to the first writable standard directory on your `PATH`. Use it to open a document from the terminal, with paths resolved relative to your current directory:
+
+```sh
+omawrite ../../notes/opencodex-chatgpt-mac-setup.md
+```
+
 The build script creates a locally signed `.app` for your Mac’s architecture, with its fonts and icon bundled. If `Omawrite.app` already exists in `/Applications`, running `./scripts/build.sh` will automatically keep `/Applications/Omawrite.app` updated.
 
 App-icon source images live in `Sources/Omawrite/Resources/AppIcons`. The build uses `stone.png` by default; additional named PNGs can be selected with `OMAWRITE_APP_ICON=name ./scripts/build.sh` and exposed in Settings through `AppIconChoice`.
